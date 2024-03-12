@@ -1,0 +1,24 @@
+﻿@model ProductViewModel
+
+<input asp-for="@Model.ImageName" hidden />
+
+
+
+<div class="row">
+    <div class="col-lg-3 col-md-6">
+        <div class="mb-4">
+            <label class="form-label text-primary fs-5" for="name">Product name</label>
+            <input type="text" class="form-control form-control-sm login-page" asp-for="@Model.Name">
+            <span asp-validation-for="@Model.Name"></span>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-3 col-md-6">
+        <div class="mb-4">
+            <label class="form-label text-primary fs-5" for="name">Price</label>
+            <input type="number" class="form-control form-control-sm login-page" asp-for="@Model.Price">
+            <span asp-validation-for="@Model.Price"></span>
+        </div>
+    </div>
+</div>

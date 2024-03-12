@@ -1,0 +1,281 @@
+﻿@model OrderViewModel
+@{
+    var Products = new SelectList(ViewBag.Products, "Id", "Name");
+}
+
+<div class="card-container w-100 pt-3">
+    <div class="container">
+        <h1 class="text-primary fw-bold text-center">Add New Order</h1>
+        <form asp-action="SaveOrder">
+            <div class="row mt-3 mb-3">
+                <div class="col-lg-3 col-md-6">
+                    <div class="mb-4">
+                        <label class="form-label text-primary fs-5" for="name">Customer</label>
+                        <input type="text" class="form-control form-control-sm" asp-for="@Model.CustomerName" id="customer-name">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="mb-4">
+                        <label class="form-label text-primary fs-5" for="product">Product</label>
+                        <select  asp-items="Products" asp-for="@Model.ProductIds" class="form-select form-select-sm" id="product-select">
+                            <option value="">----Select Options----</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="mb-4">
+                        <label class="form-label text-primary fs-5" for="price">Price</label>
+                        <input type="number" asp-for="@Model.Price" class="form-control form-control-sm" id="product-price" readonly>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="mb-4">
+                        <label class="form-label text-primary fs-5" for="quantity">Quantity</label>
+                        <input type="number" asp-for="@Model.Quantity" class="form-control form-control-sm" id="quantity">
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3">
+                    <div class="mb-3 mt-3">
+                        <label class="form-label text-primary fs-5" for="add"></label>
+                        <button class="btn btn-sm fs-6 btn-primary w-100" id="add">Add</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Product</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="orderTableBody">
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th class="text-center" scope="row">Total</th>
+                        <td colspan="5" id="totalAmount">0</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div class="d-flex justify-content-center mt-4 button-new mb-4 mt-3">
+            <button id="saveButton" class="btn btn-sm fs-6 btn-primary me-3">Save</button>
+            <button id="cancelButton" class="btn btn-sm fs-6 btn-primary">Cancel</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var orderItems = []; // Array to store order items
+
+        // Function to add a new row to the table
+        function addTableRow(productName, price, quantity, total, customerName, productIds) {
+            var tbody = document.getElementById("orderTableBody");
+            var existingRow = findExistingRow(productName); // Check if the product already exists in the table
+
+            if (existingRow) {
+                // Update row data instead of adding a new row
+                existingRow.cells[2].textContent = price; // Update price
+                existingRow.cells[3].textContent = quantity; // Update quantity
+                existingRow.cells[4].textContent = total; // Update total
+            } else {
+                // Create a new row if the product is not already in the table
+                var row = document.createElement("tr");
+                var rowData = [
+                    document.createElement("td"),
+                    document.createElement("td"),
+                    document.createElement("td"),
+                    document.createElement("td"),
+                    document.createElement("td"),
+                    document.createElement("td"),
+                 
+                ];
+
+                rowData[0].textContent = tbody.children.length + 1; // Row number
+                rowData[1].textContent = productName; // Product name
+                rowData[2].textContent = price; // Price
+                rowData[3].textContent = quantity; // Quantity
+                rowData[4].textContent = total; // Total
+
+                var editButton = document.createElement("button");
+                editButton.textContent = "Edit";
+                editButton.classList.add("btn", "btn-sm", "fs-6", "btn-primary", "me-2");
+                editButton.onclick = function () {
+                    editOrder(rowData);
+                };
+
+                var deleteButton = document.createElement("button");
+                deleteButton.textContent = "Delete";
+                deleteButton.classList.add("btn", "btn-sm", "fs-6", "btn-danger");
+                deleteButton.onclick = function () {
+                    // Delete row when delete button is clicked
+                    var index = Array.from(row.parentNode.children).indexOf(row);
+                    orderItems.splice(index, 1);
+                    tbody.removeChild(row);
+                    updateTotalAmount();
+                };
+
+                rowData[5].appendChild(editButton); // Add edit button
+                rowData[5].appendChild(deleteButton); // Add delete button
+
+                rowData.forEach(function (td) {
+                    var cell = document.createElement("td");
+                    cell.appendChild(td);
+                    row.appendChild(cell);
+                });
+
+                tbody.appendChild(row);
+
+                // Add order item to the array
+                var orderItem = {
+                    productName: productName,
+                    price: price,
+                    quantity: quantity,
+                    total: total,
+                    customerName: customerName,
+                    productIds: productIds
+                };
+                orderItems.push(orderItem);
+            }
+
+            // Function to find if the product already exists in the table
+            function findExistingRow(productName) {
+                var rows = tbody.getElementsByTagName("tr");
+                for (var i = 0; i < rows.length; i++) {
+                    if (rows[i].cells[1].textContent === productName) {
+                        return rows[i];
+                    }
+                }
+                return null;
+            }
+        }
+
+        // Function to update total amount
+        function updateTotalAmount() {
+            var total = orderItems.reduce(function (acc, item) {
+                return acc + (item.price * item.quantity);
+            }, 0);
+
+            document.getElementById("totalAmount").textContent = total;
+        }
+
+        // Function to populate form fields for editing an existing order
+        function editOrder(rowData) {
+            
+            // Extract data from the row
+            var productName = rowData[1].textContent;
+            var price = rowData[2].textContent;
+            var quantity = rowData[3].textContent;
+            var customerName = rowData[4].textContent;
+
+            // Populate form fields with the selected order item's data
+            document.getElementById("customer-name").value = customerName;
+            // Implement the logic to set the product select value based on productName, if required
+            document.getElementById("product-select").value = ""; // Clear selection for now
+            document.getElementById("product-price").value = price;
+            document.getElementById("quantity").value = quantity;
+        }
+
+        // Add listener to the form for adding an item to the order
+        document.getElementById("add").addEventListener("click", function (event) {
+            event.preventDefault();
+
+            var productName = document.getElementById("product-select").options[document.getElementById("product-select").selectedIndex].text;
+            var productIds = Array.from(document.getElementById("product-select").selectedOptions).map(option => option.value);
+            var price = parseFloat(document.getElementById("product-price").value);
+            var quantity = parseInt(document.getElementById("quantity").value);
+            var customerName = document.getElementById("customer-name").value;
+
+            if (productIds.length > 0 && price && quantity) {
+                var total = price * quantity;
+                addTableRow(productName, price, quantity, total, customerName, productIds);
+                updateTotalAmount();
+
+                // Reset input fields
+                document.getElementById("product-select").selectedIndex = 0;
+                document.getElementById("product-price").value = "";
+                document.getElementById("quantity").value = "";
+                document.getElementById("customer-name").value = "";
+            } else {
+                alert("Please fill all fields.");
+            }
+        });
+
+        // Add listener to the save button for saving the order
+        document.getElementById("saveButton").addEventListener("click", function (event) {
+            event.preventDefault();
+
+            if (orderItems.length > 0) {
+                // Send orderItems to the server to save the orders
+                fetch("/Orders/SaveOrder", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(orderItems)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Failed to save order.");
+                        }
+                        // Reset data after saving
+                        orderItems = [];
+                        document.getElementById("orderTableBody").innerHTML = "";
+                        document.getElementById("totalAmount").textContent = "0";
+
+                        // Redirect to index page on successful save
+                        window.location.href = "/Orders/Index";
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert("Failed to save order.");
+                    });
+            } else {
+                alert("Please add items to the order.");
+            }
+        });
+
+        // Add listener to the cancel button to reset the form
+        document.getElementById("cancelButton").addEventListener("click", function (event) {
+            event.preventDefault();
+
+            // Reset data
+            orderItems = [];
+            document.getElementById("orderTableBody").innerHTML = "";
+            document.getElementById("totalAmount").textContent = "0";
+        });
+
+        // Product prices
+        var productPrices = {
+        @foreach (var product in ViewBag.Products)
+        {
+            <text>"@product.Id": @product.Price, </text>
+        }
+            };
+
+        // Update product price when selected
+        const productSelect = document.getElementById("product-select");
+        const productPriceInput = document.getElementById("product-price");
+
+        productSelect.addEventListener("change", function () {
+            const selectedProductIds = Array.from(productSelect.selectedOptions).map(option => option.value);
+            const prices = selectedProductIds.map(productId => productPrices[productId] || 0);
+            const price = prices.reduce((total, p) => total + p, 0);
+
+            // Display total price
+            productPriceInput.value = price;
+        });
+    </script>
+
+
+
+}

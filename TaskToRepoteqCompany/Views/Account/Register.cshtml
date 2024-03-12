@@ -1,0 +1,43 @@
+﻿@model RegisterViewModel
+
+<div asp-validation-summary="All">
+</div>
+<div class="container h-100">
+    <div class="d-flex justify-content-center align-items-center h-100" style="margin-top: 10vh;">
+        <form class="w-50" asp-action="Register" >
+            <div class="mb-4">
+                <label class="form-label text-primary fs-5" asp-for="@Model.FName">First Name</label>
+                <input type="text" asp-for="@Model.FName" class="form-control">
+                <span asp-validation-for="@Model.FName" ></span>
+            </div>
+            <div class="mb-4">
+                <label class="form-label text-primary fs-5" asp-for="@Model.LName">Last Name</label>
+                <input type="text" asp-for="@Model.LName" class="form-control " >
+                <span asp-validation-for="@Model.LName" ></span>
+            </div>
+            <div class="mb-4">
+                <label class="form-label text-primary fs-5" asp-for="@Model.Email">Email</label>
+                <input type="email" asp-for="@Model.Email" class="form-control " >
+                <span asp-validation-for="@Model.Email" ></span>
+            </div>
+           
+
+            <div class="mb-5">
+                <label class="form-label text-primary fs-5" asp-for="@Model.Password">Password</label>
+                <input type="password" asp-for="@Model.Password" class="form-control  
+                       autocomplete="current-password">
+                <span asp-validation-for="@Model.Password"></span>
+            </div>
+
+            <div>
+                <button  type="submit"  class="btn  btn-primary w-100 fs-5">
+                    Register
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@section VaildationScriptSection
+{
+    <partial name="_ValidationScriptsPartial"></partial>
+}

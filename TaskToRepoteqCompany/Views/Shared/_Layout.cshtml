@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TaskToRepoteqCompany</title>
+ 
+    <link href="~/css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/css/style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/TaskToRepoteqCompany.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <nav class="navbar ">
+        <div class="container justify-content-between align-items-center">
+            <a href="login.html" class="text-decoration-none">
+                <span class="navbar-brand mb-0 h1 text-primary ">LOGO</span>
+            </a>
+            @if (User.Identity.IsAuthenticated == false)
+            {
+
+                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Login</a>
+            }
+            else
+            {
+                <a class="nav-link text-dark" href="#">Welcome @User.Identity.Name.Split('@')[0]</a>
+
+            }
+        </div>
+    </nav>
+    <div class="parent-dashboard d-flex ">
+        <div class="sidebar bg-primary ">
+            <ul>
+                <li><a asp-controller="Home" asp-action="Index" >Home</a></li>
+                <li><a asp-controller="Products" asp-action="Index">Products</a></li>
+                <li><a asp-controller="Orders" asp-action="Index">Orders</a></li>
+                  @if (User.Identity.IsAuthenticated == true)
+                {
+                    <li> <a asp-area="" asp-controller="Account" asp-action="SignOut">Logout</a></li>
+                }
+                
+            </ul>
+        </div>
+     @RenderBody()
+    </div>
+   
+    <script src="js/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+    @RenderSection("Scripts", required: false)
+    @await RenderSectionAsync("VaildationScriptSection", required:false)
+</body>
+
+</html>
